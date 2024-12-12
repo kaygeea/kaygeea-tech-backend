@@ -20,17 +20,16 @@ export function globalErrorHandler(
   const statusCode = error.httpErrorCode || 500;
   const status = error.status || "error";
   const message = error.message || "Something went wrong...";
-  // const cause = error.cause ? error.cause : undefined;
 
   if (error instanceof DtoValidationError) {
-    logger.error(`Invalid data receieved: ${error.errors}`);
+    logger.error(`Invalid data received: ${error.errors}`);
     const validationErrors: SerializedError[] = error.errors;
 
     res.status(statusCode).json({
       status,
       message,
       validationErrors,
-    }); // Try to send the response object with `.send` instead of `.json`
+    });
   }
 
   if (error instanceof UserNotFoundError) {
