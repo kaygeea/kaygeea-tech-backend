@@ -1,9 +1,9 @@
 import { plainToInstance } from "class-transformer";
 import { validate, ValidationError } from "class-validator";
 import { Request, Response, NextFunction, RequestHandler } from "express";
-import DtoValidationError from "../../customErrors/validation.error.js";
-import UnexpectedError from "../../customErrors/unexpected.error.js";
-import { BaseDto } from "../../DTOs/base.dto.js";
+import DtoValidationError from "../customErrors/validation.error.js";
+import UnexpectedError from "../customErrors/unexpected.error.js";
+import { BaseDto } from "../DTOs/base.dto.js";
 
 export function validateParamsAsDto<T extends BaseDto>(dto: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

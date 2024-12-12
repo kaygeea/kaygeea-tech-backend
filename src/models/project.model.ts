@@ -8,7 +8,7 @@ import {
 import { Logger } from "winston";
 import { LoggerService } from "../services/logger.service.js";
 import { IMongoDatabase } from "../interfaces/database.interface.js";
-import { CreateProjectRequestDto } from "../utils/DTOs/create-project.request.dto.js";
+// import { CreateProjectRequestDto } from "../utils/DTOs/create-project.request.dto.js";
 import { IUserProfile } from "../interfaces/user-profile.interface.js";
 import { IProject } from "../interfaces/project.interface.js";
 
@@ -29,7 +29,8 @@ export class ProjectModel {
 
   async addNewProject(
     profileId: string,
-    projectData: CreateProjectRequestDto,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    projectData: any, // CreateProjectRequestDto,
   ): Promise<UpdateResult> {
     try {
       const newProject: IProject = {
@@ -65,7 +66,7 @@ export class ProjectModel {
       this.logger.error(
         `Unexpected error occurred while trying to insert new project document: ${(error as Error).message}`,
       );
-      throw new Error("Unexpected Error Occured", { cause: error });
+      throw new Error("Unexpected Error Occurred", { cause: error });
     }
   }
 

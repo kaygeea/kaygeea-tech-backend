@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { validateParamsAsDto } from "../utils/middlewares/debug-middlewares/param-validator.middleware.js";
+import { validateParamsAsDto } from "../utils/middlewares/param-validator.middleware.js";
 import { DbService } from "../services/database.service.js";
 import { LoggerService } from "../services/logger.service.js";
 import { ProfileModel } from "../models/profile.model.js";
