@@ -19,7 +19,7 @@ const viewService = new ViewService(
 const viewController = new ViewController(viewService, loggerService);
 const viewRouter: Router = Router();
 
-viewRouter.get("/:userName", viewController.viewHomePage);
+viewRouter.get("/:userName?", viewController.viewHomePage);
 viewRouter.get(
   "/:projectName/:projectDetailId",
   validateParamsAsDto(ProjectDetailRequestDto),
