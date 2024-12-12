@@ -192,8 +192,10 @@ Create a `.ENV` file based on this template
     # Express server port
     PORT=3000
 
-    # Database service log file path
+    # Database service log file path 
     DATABASE_SERVICE_LOG_FILE=<path-to-store-db-logs>
+
+    # NB: An environment variable can also be created for a log file path for any other service in the app.
 
     # JWT secret string
     SECRET_STR=<your-jwt-secret>
