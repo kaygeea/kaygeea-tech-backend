@@ -1,6 +1,8 @@
-import { Collection, ObjectId, Db, Filter, Document } from "mongodb";
+import { Collection, Db, ObjectId } from "mongodb";
 import { IProjectDetail } from "../interfaces/project-detail.interface.js";
 import UnexpectedError from "../utils/customErrors/unexpected.error.js";
+import { IProjectDetailFilter } from "../interfaces/project-detail-filter.interface.js";
+import { ProjectDetailRequestDto } from "../utils/DTOs/project-detail.request.dto.js";
 
 export class ProjectDetailModel {
   private readonly collection: Collection;
@@ -9,13 +11,18 @@ export class ProjectDetailModel {
     this.collection = this.dbConn.collection("project_details");
   }
 
-  async fetchProjectDetailById(
-    fetchCriteriaValue: string,
+  async fetchProjectDetailBy(
+    projectDetailRequestData: ProjectDetailRequestDto,
   ): Promise<IProjectDetail | null> {
     try {
-      const filter: Filter<Document> = {
-        _id: new ObjectId(fetchCriteriaValue),
-      };
+      const { projectDetailId, projectName } = projectDetailRequestData;
+      let filter: IProjectDetailFilter;
+
+      if (projectDetailId) {
+        filter = { _id: new ObjectId(projectDetailId), name: projectName };
+      } else {
+        filter = { name: projectName };
+      }
 
       const projectDetail: IProjectDetail | null =
         await this.collection.findOne<IProjectDetail>(filter);

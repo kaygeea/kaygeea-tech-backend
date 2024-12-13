@@ -1,26 +1,26 @@
-import { IsMongoId, IsOptional, IsString } from "class-validator";
+import { IsDefined, IsMongoId, IsOptional, IsString } from "class-validator";
 import { BaseDto } from "./base.dto.js";
 
 export interface IProjectDetailRequestBody {
-  projectDetailId: string;
   projectName: string;
+  projectDetailId?: string;
 }
 
 export class ProjectDetailRequestDto extends BaseDto {
-  @IsOptional()
+  @IsDefined()
   @IsString()
-  @IsMongoId()
-  projectDetailId!: string;
+  projectName!: string;
 
   @IsOptional()
   @IsString()
-  projectName!: string;
+  @IsMongoId()
+  projectDetailId?: string;
 
   constructor(input: IProjectDetailRequestBody) {
     super();
     if (input) {
-      this.projectDetailId = input.projectDetailId;
       this.projectName = input.projectName;
+      this.projectDetailId = input.projectDetailId;
     }
   }
 }

@@ -21,7 +21,7 @@ const viewRouter: Router = Router();
 
 viewRouter.get("/:userName?", viewController.viewHomePage);
 viewRouter.get(
-  "/:projectName/:projectDetailId",
+  "/projects/:projectName/:projectDetailId?",
   validateParamsAsDto(ProjectDetailRequestDto),
   viewController.viewProjectDetailsPage,
 );

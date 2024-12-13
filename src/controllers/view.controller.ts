@@ -43,12 +43,14 @@ export class ViewController {
       const profiler = this.logger.startTimer();
 
       const DtoData: IProjectDetailRequestBody = {
-        projectDetailId: req.params.projectDetailId,
         projectName: req.params.projectName,
+        projectDetailId: req.params.projectDetailId
+          ? req.params.projectDetailId
+          : undefined,
       };
       const ProjectDetailRequestData = new ProjectDetailRequestDto(DtoData);
       const projectDetailsPageData: IProjectDetail | null =
-        await this.viewService.getProjectDetailById(ProjectDetailRequestData);
+        await this.viewService.getProjectDetailBy(ProjectDetailRequestData);
 
       profiler.done({
         message: `${req.method} Request to ${req.url} processed.`,

@@ -54,29 +54,33 @@ export class ViewService {
     }
   }
 
-  async getProjectDetailById(
+  async getProjectDetailBy(
     projectDetailRequestData: ProjectDetailRequestDto,
   ): Promise<IProjectDetail | null> {
-    const { projectDetailId } = projectDetailRequestData;
+    const { projectName } = projectDetailRequestData;
 
     try {
-      this.logger.info(`Fetching project details with ID : ${projectDetailId}`);
+      this.logger.info(
+        `Fetching project details for project "${projectName}".`,
+      );
 
       const projectDetail: IProjectDetail | null =
-        await this.projectDetailModel.fetchProjectDetailById(projectDetailId);
+        await this.projectDetailModel.fetchProjectDetailBy(
+          projectDetailRequestData,
+        );
 
       if (!projectDetail) {
-        throw new NotFoundError(`Project detail with ID: ${projectDetailId}`);
+        throw new NotFoundError(`Project detail for project: ${projectName}`);
       }
 
       this.logger.info(
-        `Successfully fetched project details with ID: ${projectDetailId}`,
+        `Successfully fetched project details for project: ${projectName}`,
       );
       return projectDetail;
     } catch (error: unknown) {
       if (!(error instanceof AppBaseError)) {
         throw new UnexpectedError(
-          `Unexpected error while trying to fetch project detail with ID: ${projectDetailId}`,
+          `Unexpected error while trying to fetch project detail for project: ${projectName}`,
           error as Error,
           "ViewService.getProjectDetailById()",
         );
