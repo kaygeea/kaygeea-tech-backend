@@ -170,7 +170,7 @@ These features collectively showcase the API's thoughtful design and readiness f
 Clone the repository:  
 
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/kaygeea/kaygeea-tech-backend.git
    cd kaygeea-tech-backend
    ```
 
