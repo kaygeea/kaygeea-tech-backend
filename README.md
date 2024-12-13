@@ -226,7 +226,7 @@ This route directly connects to the frontend and handles requests related to fet
     - **Description:** Retrieves the user's profile information based on the `userName`.
 
 2. Get Project Details
-    - **Endpoint:** `GET /:projectName/:projectDetailId`
+    - **Endpoint:** `GET /projects/:projectName/:projectDetailId`
     - **Description:** Fetches details for a specific project using the `projectName` and `projectDetailId`.
     - **Validation**: Ensures valid route parameters using a `ProjectDetailRequestDto` class.
 
