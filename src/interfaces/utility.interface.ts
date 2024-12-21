@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { JwtPayload } from "jsonwebtoken";
+import { socialPlatformNames } from "../utils/DTOs/create-lsi-request.dto.js";
 
 export interface IUtilityService {
   hashPassword(password: string): Promise<string>;
@@ -9,4 +10,5 @@ export interface IUtilityService {
     secret: string,
   ): string;
   jwtVerifyToken(token: string, secret: string): JwtPayload | string;
+  createLsi(username: string, socialPlatform: socialPlatformNames): string;
 }
