@@ -3,7 +3,7 @@ import { ObjectId, InsertOneResult } from "mongodb";
 import { Logger } from "winston";
 import { LoggerService } from "./logger.service.js";
 import { UserUtilityServices } from "./user-utility.service.js";
-import { ProfileModel } from "../models/user-profile.model.js";
+import { UserProfileModel } from "../models/user-profile.model.js";
 import { RegisterRequestDto } from "../utils/DTOs/register-request.dto.js";
 import { RegisterResponseDto } from "../utils/DTOs/register-response.dto.js";
 import { LoginRequestDto } from "../utils/DTOs/login.request.dto.js";
@@ -26,7 +26,7 @@ export class UserProfileService {
   constructor(
     private readonly loggerService: LoggerService,
     private readonly utilityServices: UserUtilityServices,
-    private readonly profileModel: ProfileModel,
+    private readonly userProfileModel: UserProfileModel,
   ) {
     dotenv.config();
     this.logger = this.loggerService.createLogger(
@@ -43,7 +43,7 @@ export class UserProfileService {
       const { firstName, lastName, username, email, password } = userData;
 
       // Check that user does not already exist
-      const checkEmail = await this.profileModel.fetchUserProfileBy(
+      const checkEmail = await this.userProfileModel.fetchUserProfileBy(
         "email",
         email,
       );
@@ -56,7 +56,7 @@ export class UserProfileService {
         );
       }
 
-      const checkUsername = await this.profileModel.fetchUserProfileBy(
+      const checkUsername = await this.userProfileModel.fetchUserProfileBy(
         "username",
         username,
       );
@@ -84,7 +84,7 @@ export class UserProfileService {
 
       // Create new user profile
       const newUser: InsertOneResult | null =
-        await this.profileModel.createUserProfile(userInitData);
+        await this.userProfileModel.createUserProfile(userInitData);
 
       if (!newUser) {
         throw new HttpError(
@@ -116,9 +116,11 @@ export class UserProfileService {
       const { email, password } = userLoginData;
 
       // check that user exists
-      const user = await this.profileModel.fetchUserProfileBy("email", email, {
-        forLogin: true,
-      });
+      const user = await this.userProfileModel.fetchUserProfileBy(
+        "email",
+        email,
+        { forLogin: true },
+      );
 
       // If user exists, check that user password is correct
       if (user) {
@@ -158,7 +160,7 @@ export class UserProfileService {
     checkValue: string,
   ): Promise<boolean> {
     // Check that user exists
-    const checkUsername = await this.profileModel.fetchUserProfileBy(
+    const checkUsername = await this.userProfileModel.fetchUserProfileBy(
       checkCriteria,
       checkValue,
       { forCheck: true },
@@ -179,7 +181,7 @@ export class UserProfileService {
       );
 
       // upsert new document in the shape {lsi: lsi, social_platform: socialPlatform: count: number}
-      this.profileModel.addNewLsiRecord(username, DbLsiData);
+      this.userProfileModel.addNewLsiRecord(username, DbLsiData);
 
       this.logger.info(
         `Successfully added new ${socialPlatformName} LSI record for user: ${username}`,
@@ -199,7 +201,7 @@ export class UserProfileService {
   async updateLsiCount(username: string, lsi: string): Promise<void> {
     // Does not return LSI record, but IUserProfile
     try {
-      const updatedLsiRecord = await this.profileModel.updateLsiCount(
+      const updatedLsiRecord = await this.userProfileModel.updateLsiCount(
         username,
         lsi,
       );

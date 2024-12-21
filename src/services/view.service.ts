@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import { Logger } from "winston";
 import { LoggerService } from "./logger.service.js";
-import { ProfileModel } from "../models/profile.model.js";
+import { UserProfileModel } from "../models/user-profile.model.js";
 import { ProjectDetailModel } from "../models/project-detail.model.js";
 import { IUserProfile } from "../interfaces/user-profile.interface.js";
 import { IProjectDetail } from "../interfaces/project-detail.interface.js";
@@ -17,7 +17,7 @@ export class ViewService {
 
   constructor(
     private readonly loggerService: LoggerService,
-    private readonly profileModel: ProfileModel,
+    private readonly userProfileModel: UserProfileModel,
     private readonly projectDetailModel: ProjectDetailModel,
     private readonly generalUtilityService: GeneralUtilityServices,
     private readonly userProfileEvents: UserProfileEvents,
@@ -37,7 +37,7 @@ export class ViewService {
     try {
       this.logger.info(`Fetching home page profile for user: ${username}`);
       const profile: IUserProfile | null =
-        await this.profileModel.fetchUserProfileBy("username", username);
+        await this.userProfileModel.fetchUserProfileBy("username", username);
 
       if (!profile) {
         throw new NotFoundError(`User with username: ${username}`);

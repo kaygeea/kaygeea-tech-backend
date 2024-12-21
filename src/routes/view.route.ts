@@ -2,7 +2,7 @@ import { Router } from "express";
 import { validateParamsAsDto } from "../utils/middlewares/param-validator.middleware.js";
 import { DbService } from "../services/database.service.js";
 import { LoggerService } from "../services/logger.service.js";
-import { ProfileModel } from "../models/profile.model.js";
+import { UserProfileModel } from "../models/user-profile.model.js";
 import { ProjectDetailModel } from "../models/project-detail.model.js";
 import { ViewService } from "../services/view.service.js";
 import { ViewController } from "../controllers/view.controller.js";
@@ -14,20 +14,20 @@ import { UserProfileEvents } from "../events/user-profile.events.js";
 // import logRequestBody from "../utils/middlewares/debugging-middlewares/log-req-value.middleware.js";
 
 const loggerService = new LoggerService();
-const profileModel = new ProfileModel(DbService.dbConn);
+const userProfileModel = new UserProfileModel(DbService.dbConn);
 const projectDetailModel = new ProjectDetailModel(DbService.dbConn);
 const generalUtilityServices = new GeneralUtilityServices();
 const userProfileService = new UserProfileService(
   loggerService,
   new UserUtilityServices(),
-  profileModel,
+  userProfileModel,
 );
 
 const userProfileEvents = new UserProfileEvents(userProfileService);
 
 const viewService = new ViewService(
   loggerService,
-  profileModel,
+  userProfileModel,
   projectDetailModel,
   generalUtilityServices,
   userProfileEvents,

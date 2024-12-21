@@ -3,8 +3,8 @@ import { validatePayloadAsDto } from "../utils/middlewares/body-validator.middle
 import { DbService } from "../services/database.service.js";
 import { LoggerService } from "../services/logger.service.js";
 import { UserUtilityServices } from "../services/user-utility.service.js";
-import { ProfileModel } from "../models/user-profile.model.js";
-import ProfileController from "../controllers/user-profile.controller.js";
+import { UserProfileModel } from "../models/user-profile.model.js";
+import UserProfileController from "../controllers/user-profile.controller.js";
 import { UserProfileService } from "../services/user-profile.service.js";
 import { RegisterRequestDto } from "../utils/DTOs/register-request.dto.js";
 import { LoginRequestDto } from "../utils/DTOs/login.request.dto.js";
@@ -13,22 +13,25 @@ import { LsiService } from "../services/lsi.service.js";
 import LsiController from "../controllers/lsi.controller.js";
 
 const loggerService = new LoggerService();
-const profileModel = new ProfileModel(DbService.dbConn);
+const userprofileModel = new UserProfileModel(DbService.dbConn);
 const utilityService = new UserUtilityServices();
-const profileService = new UserProfileService(
+const userProfileService = new UserProfileService(
   loggerService,
   utilityService,
-  profileModel,
+  userprofileModel,
 );
 const lsiService = new LsiService(
   loggerService,
-  profileService,
+  userProfileService,
   utilityService,
 );
 
 const lsiController = new LsiController(loggerService, lsiService);
 
-const profileController = new ProfileController(profileService, loggerService);
+const profileController = new UserProfileController(
+  userProfileService,
+  loggerService,
+);
 
 const userProfileRouter = Router();
 

@@ -9,7 +9,7 @@ import { LoggerService } from "../services/logger.service.js";
 export default class ProfileController {
   private readonly logger: Logger;
   constructor(
-    private readonly profileService: UserProfileService,
+    private readonly userProfileService: UserProfileService,
     private readonly loggerService: LoggerService,
   ) {
     this.logger = this.loggerService.createLogger(
@@ -22,7 +22,7 @@ export default class ProfileController {
     const profiler = this.logger.startTimer();
 
     const userData = new RegisterRequestDto(req.body);
-    const newUser = await this.profileService.register(userData);
+    const newUser = await this.userProfileService.register(userData);
 
     profiler.done({
       message: `${req.method} Request to ${req.url} processed.`,
@@ -38,7 +38,7 @@ export default class ProfileController {
     const profiler = this.logger.startTimer();
 
     const loginData = new LoginRequestDto(req.body);
-    const authenticatedUser = await this.profileService.login(loginData);
+    const authenticatedUser = await this.userProfileService.login(loginData);
 
     profiler.done({
       message: `${req.method} Request to ${req.url} processed.`,

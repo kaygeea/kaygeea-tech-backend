@@ -18,7 +18,7 @@ import { ILsiRecord } from "../interfaces/lsi-record.interface.js";
 /**
  * Defines a user model for interacting with the DB and performing CRUD ops.
  */
-export class ProfileModel implements IProfileModel {
+export class UserProfileModel implements IProfileModel {
   private readonly collection: Collection<IUserProfile>;
   // private readonly logger: Logger;
 
