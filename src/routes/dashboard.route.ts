@@ -1,8 +1,8 @@
 import { Router } from "express";
-import profileRouter from "./profile.route.js";
+import userProfileRouter from "./user-profile.route.js";
 
 const dashboardRouter: Router = Router();
 
-dashboardRouter.use("/profile", profileRouter);
+dashboardRouter.use("/profile", userProfileRouter);
 
 export default dashboardRouter;
