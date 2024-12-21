@@ -2,6 +2,7 @@ import { ObjectId } from "mongodb";
 import { IEducation } from "./education.interface.js";
 import { IProject } from "./project.interface.js";
 import { ISkill } from "./skill.interface.js";
+import { ILsiRecord } from "./lsi-record.interface.js";
 
 export interface IUserProfile {
   _id: ObjectId | string;
@@ -22,4 +23,5 @@ export interface IUserProfile {
   logo?: { [mode: string]: string };
   created_at: Date;
   updated_at: Date;
+  lsiRecords: ILsiRecord[];
 }

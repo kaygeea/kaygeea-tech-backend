@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import { Logger } from "winston";
 import { LoggerService } from "./logger.service.js";
-import { ProfileModel } from "../models/profile.model.js";
+import { UserProfileModel } from "../models/user-profile.model.js";
 import { ProjectDetailModel } from "../models/project-detail.model.js";
 import { IUserProfile } from "../interfaces/user-profile.interface.js";
 import { IProjectDetail } from "../interfaces/project-detail.interface.js";
@@ -9,14 +9,18 @@ import { ProjectDetailRequestDto } from "../utils/DTOs/project-detail.request.dt
 import UnexpectedError from "../utils/customErrors/unexpected.error.js";
 import AppBaseError from "../utils/customErrors/base.error.js";
 import NotFoundError from "../utils/customErrors/not-found.error.js";
+import { GeneralUtilityServices } from "./general-utility.service.js";
+import { UserProfileEvents } from "../events/user-profile.events.js";
 
 export class ViewService {
   private readonly logger: Logger;
 
   constructor(
     private readonly loggerService: LoggerService,
-    private readonly profileModel: ProfileModel,
+    private readonly userProfileModel: UserProfileModel,
     private readonly projectDetailModel: ProjectDetailModel,
+    private readonly generalUtilityService: GeneralUtilityServices,
+    private readonly userProfileEvents: UserProfileEvents,
   ) {
     dotenv.config();
     this.logger = this.loggerService.createLogger(
@@ -26,20 +30,28 @@ export class ViewService {
     );
   }
 
-  async getHomePageProfile(username: string): Promise<IUserProfile> {
+  async getHomePageProfile(lsi: string): Promise<IUserProfile> {
     // Used to fetch the profile data on the root route
+    const username = this.generalUtilityService.getUsernameFromLsi(lsi);
+
     try {
       this.logger.info(`Fetching home page profile for user: ${username}`);
       const profile: IUserProfile | null =
-        await this.profileModel.fetchUserProfileBy("username", username);
+        await this.userProfileModel.fetchUserProfileBy("username", username);
 
       if (!profile) {
         throw new NotFoundError(`User with username: ${username}`);
-        // Log?
       }
       this.logger.info(
-        `Profile for user ${username}, with id ${profile?._id} retrieved successfully`,
+        `Successfully retrieved profile with ID: ${profile._id}.`,
       );
+
+      if (this.generalUtilityService.getHashPartFromLsi(lsi)) {
+        this.logger.info(
+          `Updating LSI visitor count for user with ID: ${profile?._id}.`,
+        );
+        this.userProfileEvents.emitEvent("full lsi used", username, lsi);
+      }
 
       return profile;
     } catch (error: unknown) {

@@ -3,7 +3,7 @@ import { ObjectId, InsertOneResult } from "mongodb";
 import { Logger } from "winston";
 import { LoggerService } from "./logger.service.js";
 import { UserUtilityServices } from "./user-utility.service.js";
-import { ProfileModel } from "../models/profile.model.js";
+import { UserProfileModel } from "../models/user-profile.model.js";
 import { RegisterRequestDto } from "../utils/DTOs/register-request.dto.js";
 import { RegisterResponseDto } from "../utils/DTOs/register-response.dto.js";
 import { LoginRequestDto } from "../utils/DTOs/login.request.dto.js";
@@ -16,19 +16,22 @@ import {
 } from "../utils/DTOs/user-init-data.dto.js";
 import UnexpectedError from "../utils/customErrors/unexpected.error.js";
 import AppBaseError from "../utils/customErrors/base.error.js";
+import { AddNewLsiRequestDto } from "../utils/DTOs/add-new-lsi-request.dto.js";
+import { IUserProfile } from "../interfaces/user-profile.interface.js";
+// import { IUserProfile } from "../interfaces/user-profile.interface.js";
 
-export class ProfileService {
+export class UserProfileService {
   private readonly logger: Logger;
 
   constructor(
     private readonly loggerService: LoggerService,
     private readonly utilityServices: UserUtilityServices,
-    private readonly profileModel: ProfileModel,
+    private readonly userProfileModel: UserProfileModel,
   ) {
     dotenv.config();
     this.logger = this.loggerService.createLogger(
-      "ProfileServiceLogger",
-      "ProfileService",
+      "UserProfileServiceLogger",
+      "UserProfileService",
       process.env.PROFILE_SERVICE_LOG_FILE,
     );
   }
@@ -40,7 +43,7 @@ export class ProfileService {
       const { firstName, lastName, username, email, password } = userData;
 
       // Check that user does not already exist
-      const checkEmail = await this.profileModel.fetchUserProfileBy(
+      const checkEmail = await this.userProfileModel.fetchUserProfileBy(
         "email",
         email,
       );
@@ -53,7 +56,7 @@ export class ProfileService {
         );
       }
 
-      const checkUsername = await this.profileModel.fetchUserProfileBy(
+      const checkUsername = await this.userProfileModel.fetchUserProfileBy(
         "username",
         username,
       );
@@ -81,13 +84,9 @@ export class ProfileService {
 
       // Create new user profile
       const newUser: InsertOneResult | null =
-        await this.profileModel.createUserProfile(userInitData);
+        await this.userProfileModel.createUserProfile(userInitData);
 
       if (!newUser) {
-        this.logger.error(
-          "User profile creation failed. Insert was not acknowledged",
-        );
-
         throw new HttpError(
           "User profile creation failed. Insert was not acknowledged",
           status.INTERNAL_SERVER_ERROR,
@@ -117,10 +116,10 @@ export class ProfileService {
       const { email, password } = userLoginData;
 
       // check that user exists
-      const user = await this.profileModel.fetchUserProfileBy(
+      const user = await this.userProfileModel.fetchUserProfileBy(
         "email",
         email,
-        true,
+        { forLogin: true },
       );
 
       // If user exists, check that user password is correct
@@ -150,6 +149,76 @@ export class ProfileService {
           `Unexpected error while trying to login user`,
           error as Error,
           "ProfileService.login()",
+        );
+      }
+      throw error;
+    }
+  }
+
+  async userProfileExists(
+    checkCriteria: keyof Pick<IUserProfile, "email" | "username">,
+    checkValue: string,
+  ): Promise<boolean> {
+    // Check that user exists
+    const checkUsername = await this.userProfileModel.fetchUserProfileBy(
+      checkCriteria,
+      checkValue,
+      { forCheck: true },
+    );
+
+    if (!checkUsername) {
+      return false;
+    }
+
+    return true;
+  }
+
+  async addNewLsi(DbLsiData: AddNewLsiRequestDto): Promise<void> {
+    try {
+      const { username, socialPlatformName } = DbLsiData;
+      this.logger.info(
+        `Adding ${socialPlatformName} LSI record for user: ${username}`,
+      );
+
+      // upsert new document in the shape {lsi: lsi, social_platform: socialPlatform: count: number}
+      this.userProfileModel.addNewLsiRecord(username, DbLsiData);
+
+      this.logger.info(
+        `Successfully added new ${socialPlatformName} LSI record for user: ${username}`,
+      );
+    } catch (error: unknown) {
+      if (!(error instanceof AppBaseError)) {
+        throw new UnexpectedError(
+          `Unexpected error while trying to add new LSI record`,
+          error as Error,
+          "UserProfileService.addNewLsi()",
+        );
+      }
+      throw error;
+    }
+  }
+
+  async updateLsiCount(username: string, lsi: string): Promise<void> {
+    // Does not return LSI record, but IUserProfile
+    try {
+      const updatedLsiRecord = await this.userProfileModel.updateLsiCount(
+        username,
+        lsi,
+      );
+      if (updatedLsiRecord === 0) {
+        this.logger.info(
+          "LSI Count update failed. Invalid LSI hash part received",
+        );
+      } else {
+        this.logger.info(`Successfully updated LSI visitor count`);
+      }
+    } catch (error: unknown) {
+      if (!(error instanceof AppBaseError)) {
+        // Process will crash if any error is thrown!
+        throw new UnexpectedError(
+          `Unexpected error while trying to add new LSI record`,
+          error as Error,
+          "UserProfileService.addNewLsi()",
         );
       }
       throw error;

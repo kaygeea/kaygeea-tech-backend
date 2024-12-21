@@ -1,0 +1,9 @@
+{
+    "extension": ["ts"],
+    "inlineDiffs": true,
+    "loader": "ts-node/esm",
+    "noPackage": true,
+    "reporter": "spec",
+    // "require": "ts-node/register",
+    "spec": ["src/**/*.spec.ts"]
+}

@@ -22,7 +22,9 @@ export function globalErrorHandler(
   const message = error.message || "Something went wrong...";
 
   if (error instanceof DtoValidationError) {
-    logger.error(`Invalid data received: ${error.errors}`);
+    logger.error(
+      `Invalid data received: ${JSON.stringify(error.errors, null, 2)}`,
+    );
     const validationErrors: SerializedError[] = error.errors;
 
     res.status(statusCode).json({
@@ -46,7 +48,7 @@ export function globalErrorHandler(
 
   if (error instanceof UnexpectedError) {
     logger.error(
-      `${error.message}. Details ${JSON.stringify(error.errorMessage)}`,
+      `${error.message}. Details ${JSON.stringify(error.errorMessage, null, 2)}`,
     );
 
     res.status(statusCode).json({

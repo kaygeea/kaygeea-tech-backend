@@ -25,7 +25,7 @@ type AsyncRequestHandler = (
  * any errors, forwarding them to the global error handler middleware.
  *
  * @param {AsyncRequestHandler} asyncFunction - An asynchronous function to handle the request.
- * @returns {Function} A middleware function that handles errors and forwards them to the global error handler middleqare.
+ * @returns {Function} A middleware function that handles errors and forwards them to the global error handler middleware.
  *
  */
 export function asyncErrorHandler(

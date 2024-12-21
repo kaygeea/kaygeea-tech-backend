@@ -21,7 +21,6 @@ export default class UnexpectedError extends AppBaseError {
 
   private serializeErrors(): SerializedError {
     const UnexpectedError: IUnexpectedErrorMessage = {
-      message: this.message,
       origin: this.errorOrigin,
       originalErrMsg: this.cause.message,
       stackTrace: this.cause.stack,
