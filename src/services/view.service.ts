@@ -9,6 +9,8 @@ import { ProjectDetailRequestDto } from "../utils/DTOs/project-detail.request.dt
 import UnexpectedError from "../utils/customErrors/unexpected.error.js";
 import AppBaseError from "../utils/customErrors/base.error.js";
 import NotFoundError from "../utils/customErrors/not-found.error.js";
+import { GeneralUtilityServices } from "./general-utility.service.js";
+import { UserProfileEvents } from "../events/user-profile.events.js";
 
 export class ViewService {
   private readonly logger: Logger;
@@ -17,6 +19,8 @@ export class ViewService {
     private readonly loggerService: LoggerService,
     private readonly profileModel: ProfileModel,
     private readonly projectDetailModel: ProjectDetailModel,
+    private readonly generalUtilityService: GeneralUtilityServices,
+    private readonly userProfileEvents: UserProfileEvents,
   ) {
     dotenv.config();
     this.logger = this.loggerService.createLogger(
@@ -26,8 +30,10 @@ export class ViewService {
     );
   }
 
-  async getHomePageProfile(username: string): Promise<IUserProfile> {
+  async getHomePageProfile(lsi: string): Promise<IUserProfile> {
     // Used to fetch the profile data on the root route
+    const username = this.generalUtilityService.getUsernameFromLsi(lsi);
+
     try {
       this.logger.info(`Fetching home page profile for user: ${username}`);
       const profile: IUserProfile | null =
@@ -35,11 +41,17 @@ export class ViewService {
 
       if (!profile) {
         throw new NotFoundError(`User with username: ${username}`);
-        // Log?
       }
       this.logger.info(
-        `Profile for user ${username}, with id ${profile?._id} retrieved successfully`,
+        `Successfully retrieved profile with ID: ${profile._id}.`,
       );
+
+      if (this.generalUtilityService.getHashPartFromLsi(lsi)) {
+        this.logger.info(
+          `Updating LSI visitor count for user with ID: ${profile?._id}.`,
+        );
+        this.userProfileEvents.emitEvent("full lsi used", username, lsi);
+      }
 
       return profile;
     } catch (error: unknown) {

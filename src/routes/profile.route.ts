@@ -5,24 +5,32 @@ import { LoggerService } from "../services/logger.service.js";
 import { UserUtilityServices } from "../services/user-utility.service.js";
 import { ProfileModel } from "../models/profile.model.js";
 import ProfileController from "../controllers/profile.controller.js";
-import { ProfileService } from "../services/profile.service.js";
+import { UserProfileService } from "../services/user-profile.service.js";
 import { RegisterRequestDto } from "../utils/DTOs/register-request.dto.js";
 import { LoginRequestDto } from "../utils/DTOs/login.request.dto.js";
+import { CreateLsiRequestDto } from "../utils/DTOs/create-lsi-request.dto.js";
+import { LsiService } from "../services/lsi.service.js";
+import LsiController from "../controllers/lsi.controller.js";
 
-const loggerService: LoggerService = new LoggerService();
-const profileModel: ProfileModel = new ProfileModel(DbService.dbConn);
-const utilityService: UserUtilityServices = new UserUtilityServices();
-const profileService: ProfileService = new ProfileService(
+const loggerService = new LoggerService();
+const profileModel = new ProfileModel(DbService.dbConn);
+const utilityService = new UserUtilityServices();
+const profileService = new UserProfileService(
   loggerService,
   utilityService,
   profileModel,
 );
-const profileController: ProfileController = new ProfileController(
-  profileService,
+const lsiService = new LsiService(
   loggerService,
+  profileService,
+  utilityService,
 );
 
-const profileRouter: Router = Router();
+const lsiController = new LsiController(loggerService, lsiService);
+
+const profileController = new ProfileController(profileService, loggerService);
+
+const profileRouter = Router();
 
 profileRouter.post(
   "/register",
@@ -34,6 +42,12 @@ profileRouter.post(
   "/login",
   validatePayloadAsDto(LoginRequestDto),
   profileController.login,
+);
+
+profileRouter.post(
+  "/link/create",
+  validatePayloadAsDto(CreateLsiRequestDto),
+  lsiController.createLsi,
 );
 
 export default profileRouter;

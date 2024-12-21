@@ -1,21 +1,32 @@
-import { Collection, Filter, Document, InsertOneResult, Db } from "mongodb";
+import {
+  Collection,
+  Filter,
+  Document,
+  InsertOneResult,
+  Db,
+  UpdateFilter,
+  UpdateOptions,
+  UpdateResult,
+} from "mongodb";
 import { IUserProfile } from "../interfaces/user-profile.interface.js";
 import { IProfileModel } from "../interfaces/profile-model.interface.js";
 import { UserInitDataDto } from "../utils/DTOs/user-init-data.dto.js";
 import UnexpectedError from "../utils/customErrors/unexpected.error.js";
+import { AddNewLsiRequestDto } from "../utils/DTOs/add-new-lsi-request.dto.js";
+import { ILsiRecord } from "../interfaces/lsi-record.interface.js";
 
 /**
  * Defines a user model for interacting with the DB and performing CRUD ops.
  */
 export class ProfileModel implements IProfileModel {
-  private readonly collection: Collection;
+  private readonly collection: Collection<IUserProfile>;
   // private readonly logger: Logger;
 
   /**
    * @param {Db} dbConn - A database connection object for the target database.
    */
   constructor(private readonly dbConn: Db) {
-    this.collection = this.dbConn.collection("profiles");
+    this.collection = this.dbConn.collection<IUserProfile>("profiles");
   }
 
   /**
@@ -26,7 +37,7 @@ export class ProfileModel implements IProfileModel {
    */
   async createUserProfile(
     userInitData: UserInitDataDto,
-  ): Promise<InsertOneResult | null> {
+  ): Promise<InsertOneResult<IUserProfile> | null> {
     try {
       const newUserDocument: Document = {
         first_name: userInitData.firstName,
@@ -34,13 +45,13 @@ export class ProfileModel implements IProfileModel {
         username: userInitData.username,
         email: userInitData.email.toLowerCase(),
         password_hash: userInitData.passwordHash,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        created_at: new Date(),
+        updated_at: new Date(),
       };
 
       // Insert user data into database
-      const insertOp: InsertOneResult | null =
-        await this.collection.insertOne(newUserDocument);
+      const insertOp: InsertOneResult<IUserProfile> | null =
+        await this.collection.insertOne(newUserDocument as IUserProfile);
 
       return insertOp;
     } catch (error: unknown) {
@@ -58,7 +69,7 @@ export class ProfileModel implements IProfileModel {
    * 2. username
    *
    * Search the relevant collection in the database and return the first
-   * document that matches the given search criteria or thows an error if no
+   * document that matches the given search criteria or throws an error if no
    * match is found
    * @param {string} fetchCriteria - A string that corresponds to a field in the document to be returned.
    * @param {string} fetchCriteriaValue - A string that corresponds to the value at the `fetchCriteria` field.
@@ -67,16 +78,26 @@ export class ProfileModel implements IProfileModel {
   async fetchUserProfileBy(
     fetchCriteria: keyof Pick<IUserProfile, "email" | "username">,
     fetchCriteriaValue: string,
-    forLogin = false,
+    options: { forLogin?: boolean; forCheck?: boolean } = {},
   ): Promise<IUserProfile | null> {
+    const { forLogin = false, forCheck = false } = options;
     try {
-      const filter: Filter<Document> = { [fetchCriteria]: fetchCriteriaValue };
-      const projection: Document = forLogin
-        ? { password_hash: 1, username: 1, email: 1 }
-        : { password_hash: 0 };
+      const filter: Filter<IUserProfile> = {
+        [fetchCriteria]: fetchCriteriaValue,
+      };
+      let projection: Document;
+
+      if (forLogin) {
+        projection = { password_hash: 1, username: 1, email: 1 };
+      } else if (forCheck) {
+        projection = { _id: 1 };
+      } else {
+        projection = { password_hash: 0, lsi_records: 0 };
+      }
 
       const userProfile: IUserProfile | null =
         await this.collection.findOne<IUserProfile>(filter, { projection });
+
       return userProfile;
     } catch (error: unknown) {
       throw new UnexpectedError(
@@ -85,5 +106,55 @@ export class ProfileModel implements IProfileModel {
         "ProfileModel.fetchUserProfileBy()",
       );
     }
+  }
+
+  async addNewLsiRecord(
+    username: string,
+    dbLsiData: AddNewLsiRequestDto,
+  ): Promise<UpdateResult<IUserProfile>> {
+    try {
+      const { lsi, socialPlatformName, visitorCount } = dbLsiData;
+      const lsiRecord: ILsiRecord = {
+        lsi,
+        s_p_n: socialPlatformName,
+        count: visitorCount,
+      };
+
+      const filter: Filter<IUserProfile> = { username };
+
+      const update: UpdateFilter<IUserProfile> = {
+        $push: { lsi_records: lsiRecord },
+      };
+
+      const options: UpdateOptions = { upsert: true };
+
+      const updateResult = await this.collection.updateOne(
+        filter,
+        update,
+        options,
+      );
+
+      return updateResult;
+    } catch (error: unknown) {
+      throw new UnexpectedError(
+        "Unexpected error while trying to fetch user document.",
+        error as Error,
+        "ProfileModel.fetchUserProfileBy()",
+      );
+    }
+  }
+
+  async updateLsiCount(username: string, inputLsi: string): Promise<number> {
+    const filter: Filter<IUserProfile> = {
+      username,
+      "lsi_records.lsi": inputLsi,
+    };
+    const update: UpdateFilter<Document> = {
+      $inc: { "lsi_records.$.count": 1 },
+    };
+
+    const updateOp = await this.collection.updateOne(filter, update);
+
+    return updateOp.modifiedCount;
   }
 }

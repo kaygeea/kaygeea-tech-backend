@@ -25,13 +25,14 @@ export class ViewController {
 
   viewHomePage = asyncErrorHandler(async (req: Request, res: Response) => {
     const profiler = this.logger.startTimer();
-    const username = req.params.userName || "Kaygeea";
+
     const homePageProfile: IUserProfile =
-      await this.viewService.getHomePageProfile(username);
+      await this.viewService.getHomePageProfile(req.params.lsi);
 
     profiler.done({
       message: `${req.method} Request to ${req.originalUrl} processed.`,
     });
+
     res.status(200).json({
       status: "success",
       data: homePageProfile,
