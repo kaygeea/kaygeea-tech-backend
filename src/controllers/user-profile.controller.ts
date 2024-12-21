@@ -1,15 +1,15 @@
 import { Request, Response } from "express";
-import { ProfileService } from "../services/profile.service.js";
+import { Logger } from "winston";
+import { UserProfileService } from "../services/user-profile.service.js";
 import { asyncErrorHandler } from "../utils/middlewares/async-error-handler.js";
 import { RegisterRequestDto } from "../utils/DTOs/register-request.dto.js";
 import { LoginRequestDto } from "../utils/DTOs/login.request.dto.js";
 import { LoggerService } from "../services/logger.service.js";
-import { Logger } from "winston";
 
 export default class ProfileController {
   private readonly logger: Logger;
   constructor(
-    private readonly profileService: ProfileService,
+    private readonly profileService: UserProfileService,
     private readonly loggerService: LoggerService,
   ) {
     this.logger = this.loggerService.createLogger(

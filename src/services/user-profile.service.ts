@@ -3,7 +3,7 @@ import { ObjectId, InsertOneResult } from "mongodb";
 import { Logger } from "winston";
 import { LoggerService } from "./logger.service.js";
 import { UserUtilityServices } from "./user-utility.service.js";
-import { ProfileModel } from "../models/profile.model.js";
+import { ProfileModel } from "../models/user-profile.model.js";
 import { RegisterRequestDto } from "../utils/DTOs/register-request.dto.js";
 import { RegisterResponseDto } from "../utils/DTOs/register-response.dto.js";
 import { LoginRequestDto } from "../utils/DTOs/login.request.dto.js";

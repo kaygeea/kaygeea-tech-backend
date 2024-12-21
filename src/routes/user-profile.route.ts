@@ -3,8 +3,8 @@ import { validatePayloadAsDto } from "../utils/middlewares/body-validator.middle
 import { DbService } from "../services/database.service.js";
 import { LoggerService } from "../services/logger.service.js";
 import { UserUtilityServices } from "../services/user-utility.service.js";
-import { ProfileModel } from "../models/profile.model.js";
-import ProfileController from "../controllers/profile.controller.js";
+import { ProfileModel } from "../models/user-profile.model.js";
+import ProfileController from "../controllers/user-profile.controller.js";
 import { UserProfileService } from "../services/user-profile.service.js";
 import { RegisterRequestDto } from "../utils/DTOs/register-request.dto.js";
 import { LoginRequestDto } from "../utils/DTOs/login.request.dto.js";
@@ -30,24 +30,24 @@ const lsiController = new LsiController(loggerService, lsiService);
 
 const profileController = new ProfileController(profileService, loggerService);
 
-const profileRouter = Router();
+const userProfileRouter = Router();
 
-profileRouter.post(
+userProfileRouter.post(
   "/register",
   validatePayloadAsDto(RegisterRequestDto),
   profileController.register,
 );
 
-profileRouter.post(
+userProfileRouter.post(
   "/login",
   validatePayloadAsDto(LoginRequestDto),
   profileController.login,
 );
 
-profileRouter.post(
+userProfileRouter.post(
   "/link/create",
   validatePayloadAsDto(CreateLsiRequestDto),
   lsiController.createLsi,
 );
 
-export default profileRouter;
+export default userProfileRouter;
