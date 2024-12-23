@@ -14,29 +14,29 @@ export class GeneralUtilityServices {
   }
 
   getUsernameFromLsi(lsi: string): string {
-    // <username>-<hash>.<nanoid>
+    // <username>-<hash>_<nanoid>
     return lsi.split("-", 1)[0];
 
     // should return <username>
   }
 
   getHashPartFromLsi(lsi: string): string | undefined {
-    // <username>-<hash>.<nanoid>
+    // <username>-<hash>_<nanoid>
     return lsi.split("-")[1];
 
-    // should return <hash>.<nanoid>
+    // should return <hash>_<nanoid>
   }
 
   private getHashFromLsi(lsi: string): string {
-    // <username>-<hash>.<nanoid>
-    return lsi.split("-")[1].split(".")[0];
+    // <username>-<hash>_<nanoid>
+    return lsi.split("-")[1].split("_")[0];
 
     // should return <hash>
   }
 
   private getNanoidFromLsi(lsi: string): string {
-    // <username>-<hash>.<nanoid>
-    return lsi.split(".")[1];
+    // <username>-<hash>_<nanoid>
+    return lsi.split("_")[1];
 
     // should return <nanoid>
   }
