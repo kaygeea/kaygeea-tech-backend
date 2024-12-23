@@ -63,6 +63,7 @@ export class LsiService {
         username,
         lsi,
         socialPlatformName: socialMediaPlatform,
+        generationDate: new Date(),
       };
       const DbLsiData = new AddNewLsiRequestDto(DbLsiObject);
 

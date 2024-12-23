@@ -10,7 +10,7 @@ import UnexpectedError from "../utils/customErrors/unexpected.error.js";
 import AppBaseError from "../utils/customErrors/base.error.js";
 import NotFoundError from "../utils/customErrors/not-found.error.js";
 import { GeneralUtilityServices } from "./general-utility.service.js";
-import { UserProfileEvents } from "../events/user-profile.events.js";
+import { UserProfileEvent } from "../events/user-profile.event.js";
 
 export class ViewService {
   private readonly logger: Logger;
@@ -20,7 +20,7 @@ export class ViewService {
     private readonly userProfileModel: UserProfileModel,
     private readonly projectDetailModel: ProjectDetailModel,
     private readonly generalUtilityService: GeneralUtilityServices,
-    private readonly userProfileEvents: UserProfileEvents,
+    private readonly userProfileEvent: UserProfileEvent,
   ) {
     dotenv.config();
     this.logger = this.loggerService.createLogger(
@@ -31,7 +31,6 @@ export class ViewService {
   }
 
   async getHomePageProfile(lsi: string): Promise<IUserProfile> {
-    // Used to fetch the profile data on the root route
     const username = this.generalUtilityService.getUsernameFromLsi(lsi);
 
     try {
@@ -50,7 +49,7 @@ export class ViewService {
         this.logger.info(
           `Updating LSI visitor count for user with ID: ${profile?._id}.`,
         );
-        this.userProfileEvents.emitEvent("full lsi used", username, lsi);
+        this.userProfileEvent.emitEvent("full lsi used", username, lsi);
       }
 
       return profile;

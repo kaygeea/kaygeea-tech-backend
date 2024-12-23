@@ -10,7 +10,7 @@ import { ProjectDetailRequestDto } from "../utils/DTOs/project-detail.request.dt
 import { UserProfileService } from "../services/user-profile.service.js";
 import { UserUtilityServices } from "../services/user-utility.service.js";
 import { GeneralUtilityServices } from "../services/general-utility.service.js";
-import { UserProfileEvents } from "../events/user-profile.events.js";
+import { UserProfileEvent } from "../events/user-profile.event.js";
 // import logRequestBody from "../utils/middlewares/debugging-middlewares/log-req-value.middleware.js";
 
 const loggerService = new LoggerService();
@@ -23,7 +23,7 @@ const userProfileService = new UserProfileService(
   userProfileModel,
 );
 
-const userProfileEvents = new UserProfileEvents(userProfileService);
+const userProfileEvents = new UserProfileEvent(userProfileService);
 
 const viewService = new ViewService(
   loggerService,

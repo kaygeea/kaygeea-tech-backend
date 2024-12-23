@@ -2,7 +2,7 @@ import { EventEmitter } from "events";
 import { UserProfileService } from "../services/user-profile.service.js";
 import UnexpectedError from "../utils/customErrors/unexpected.error.js";
 
-export class UserProfileEvents {
+export class UserProfileEvent {
   private readonly eventEmitter: EventEmitter;
 
   constructor(private readonly userProfileService: UserProfileService) {
