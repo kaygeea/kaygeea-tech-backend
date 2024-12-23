@@ -139,7 +139,7 @@ export class UserProfileModel implements IProfileModel {
       throw new UnexpectedError(
         "Unexpected error while trying to fetch user document.",
         error as Error,
-        "ProfileModel.fetchUserProfileBy()",
+        "ProfileModel.addNewLsiRecord()",
       );
     }
   }
