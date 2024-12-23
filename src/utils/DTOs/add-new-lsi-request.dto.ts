@@ -1,4 +1,5 @@
 import {
+  IsDate,
   IsDefined,
   IsNotEmpty,
   IsNumber,
@@ -14,6 +15,7 @@ export interface IAddNewLsiRequestBody {
   lsi: string;
   socialPlatformName: socialPlatformNames;
   visitorCount?: number;
+  generationDate: Date;
 }
 
 export class AddNewLsiRequestDto extends BaseDto {
@@ -25,7 +27,6 @@ export class AddNewLsiRequestDto extends BaseDto {
 
   @IsDefined()
   @IsNotEmpty()
-  // IsHash()
   lsi!: string;
 
   @IsDefined()
@@ -37,6 +38,10 @@ export class AddNewLsiRequestDto extends BaseDto {
   @IsNumber()
   visitorCount!: number;
 
+  @IsDefined()
+  @IsDate()
+  generationDate!: Date;
+
   constructor(input: IAddNewLsiRequestBody) {
     super();
     if (input) {
@@ -44,6 +49,7 @@ export class AddNewLsiRequestDto extends BaseDto {
       this.lsi = input.lsi;
       this.socialPlatformName = input.socialPlatformName;
       this.visitorCount = 0;
+      this.generationDate = input.generationDate;
     }
   }
 }
