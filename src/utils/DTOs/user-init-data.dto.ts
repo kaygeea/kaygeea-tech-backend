@@ -1,8 +1,8 @@
 import {
   IsDefined,
-  IsEmpty,
+  // IsEmpty,
   IsNotEmpty,
-  IsOptional,
+  // IsOptional,
   IsString,
 } from "class-validator";
 import {
@@ -15,9 +15,9 @@ export type UserInitData = Omit<RegisterRequestBody, "password"> & {
 };
 
 export class UserInitDataDto extends RegisterRequestDto {
-  @IsOptional()
-  @IsEmpty()
-  declare password: string;
+  // @IsOptional()
+  // @IsEmpty()
+  // declare password?: string | undefined;
 
   @IsDefined()
   @IsNotEmpty()

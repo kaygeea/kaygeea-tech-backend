@@ -10,9 +10,19 @@ import {
 import { LoggerService } from "../services/logger.service.js";
 import { Logger } from "winston";
 
+/**
+ * Controller class for handling requests related to retrieving and processing
+ * data for the frontend view.
+ */
 export class ViewController {
   private readonly logger: Logger;
 
+  /**
+   * Initializes the ViewController.
+   *
+   * @param {ViewService} viewService - Service for retrieving user profile and project details.
+   * @param {LoggerService} loggerService - Service used for profiling requests.
+   */
   constructor(
     private readonly viewService: ViewService,
     private readonly loggerService: LoggerService,
@@ -23,6 +33,14 @@ export class ViewController {
     );
   }
 
+  /**
+   * Handles requests to view the home page.
+   *
+   * @param {Request} req - The HTTP request object.
+   * @param {Response} res - The HTTP response object.
+   * @returns {Promise<void>} - Responds with the user's profile data for the home page.
+   * @throws {Error} - Propagates any errors encountered while processing the request.
+   */
   viewHomePage = asyncErrorHandler(async (req: Request, res: Response) => {
     const profiler = this.logger.startTimer();
 
@@ -39,6 +57,14 @@ export class ViewController {
     });
   });
 
+  /**
+   * Handles requests to view a project's details page.
+   *
+   * @param {Request} req - The HTTP request object.
+   * @param {Response} res - The HTTP response object.
+   * @returns {Promise<void>} - Responds with the project's details data or null if not found.
+   * @throws {Error} - Propagates any errors encountered while processing the request.
+   */
   viewProjectDetailsPage = asyncErrorHandler(
     async (req: Request, res: Response) => {
       const profiler = this.logger.startTimer();

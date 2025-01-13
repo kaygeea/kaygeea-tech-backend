@@ -6,9 +6,7 @@ import { HttpError } from "../utils/customErrors/httpError.js";
 import { Logger } from "winston";
 
 /**
- * This class exists as a singleton service to extend database related services
- * to other parts of the app. It is designed to work specifically with MongoDB.
- *
+ * Singleton service for managing MongoDB database connections.
  */
 class DatabaseService implements IMongoDatabase {
   private static instance: DatabaseService;
@@ -16,42 +14,38 @@ class DatabaseService implements IMongoDatabase {
   private readonly logger: Logger;
   public readonly dbConn: Db;
 
-  constructor(private readonly loggerService: LoggerService) {
+  /**
+   * Initializes the `DatabaseService` with the provided logger service.
+   * @param {LoggerService} loggerService - The logger service used for logging database operations.
+   * @throws {HttpError} Throws an error if the MongoDB client or database connection cannot be created.
+   */
+  private constructor(private readonly loggerService: LoggerService) {
     dotenv.config();
     this.logger = this.loggerService.createLogger(
       "DatabaseServiceLogger",
       "DatabaseService",
       process.env.DATABASE_SERVICE_LOG_FILE,
     );
-    this.client = this.initClient(process.env.MONGODB_CONN_URI as string);
+    this.client = this.initClient(
+      process.env.MONGODB_CONN_URI as string,
+      parseInt(process.env.MONGODB_MAX_CONNECTION_POOL_SIZE as string),
+    );
     this.dbConn = this.connectToDb(this.client, process.env.DB_NAME as string);
-
-    // this.client.on("connectionPoolCreated", () => {
-    //   this.logger.info("New connection pool created");
-    // });
-
-    // this.client.on("connectionCheckedIn", () => {
-    //   this.logger.info("New connection checked into connection pool");
-    // });
-
-    // this.client.on("connectionCheckedOut", () => {
-    //   this.logger.info("Used connection checked out of connection pool");
-    // });
   }
 
   /**
-   * This method creates an instance of a MongoClient and returns same
-   * on a successful creation. The client is set up with a max connection pool
-   * of 5 connections.
-   *
-   * @param {string} connectionString - The mongoDB connection URI
-   *
-   * @returns {MongoClient} An instance of a MongoClient.
-   * @throws An internal server error if the operation fails.
+   * Initializes and returns a MongoDB client with the specified connection string.
+   * @private
+   * @param {string} connectionString - The MongoDB connection string.
+   * @returns {MongoClient} The initialized MongoDB client.
+   * @throws {HttpError} Throws an error if the client cannot be created.
    */
-  private initClient(connectionString: string): MongoClient {
+  private initClient(
+    connectionString: string,
+    maxPoolSize: number,
+  ): MongoClient {
     const client = new MongoClient(connectionString, {
-      maxPoolSize: 5,
+      maxPoolSize: maxPoolSize,
       minPoolSize: 0,
       maxIdleTimeMS: Infinity,
       connectTimeoutMS: 30000,
@@ -75,9 +69,12 @@ class DatabaseService implements IMongoDatabase {
   }
 
   /**
-   * Establishes a connection with a database.
-   * @param {MongoClient} client - A MongoClient object.
-   * @returns A mongoDB database connection.
+   * Establishes and returns a connection to the specified database.
+   * @private
+   * @param {MongoClient} client - The MongoDB client.
+   * @param {string} dbName - The name of the database.
+   * @returns {Db} The connected database instance.
+   * @throws {HttpError} Throws an error if the connection cannot be established.
    */
   private connectToDb(client: MongoClient, dbName: string): Db {
     const db = client.db(dbName);
@@ -94,8 +91,8 @@ class DatabaseService implements IMongoDatabase {
   }
 
   /**
-   * Returns a singleton instance of the DatabaseService.
-   * @returns An instance of the DatabaseService.
+   * Retrieves the singleton instance of the `DatabaseService`.
+   * @returns {DatabaseService} The singleton instance of the database service.
    */
   static getInstance(): DatabaseService {
     if (!this.instance) {
@@ -105,4 +102,7 @@ class DatabaseService implements IMongoDatabase {
   }
 }
 
+/**
+ * Exported singleton instance of the `DatabaseService`.
+ */
 export const DbService: DatabaseService = DatabaseService.getInstance();

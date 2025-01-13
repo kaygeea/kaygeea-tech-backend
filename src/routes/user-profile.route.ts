@@ -11,19 +11,29 @@ import { LoginRequestDto } from "../utils/DTOs/login.request.dto.js";
 import { CreateLsiRequestDto } from "../utils/DTOs/create-lsi-request.dto.js";
 import { LsiService } from "../services/lsi.service.js";
 import LsiController from "../controllers/lsi.controller.js";
+import { AuthenticationService } from "../services/auth.service.js";
+import { EmailService } from "../services/email.service.js";
 
 const loggerService = new LoggerService();
 const userprofileModel = new UserProfileModel(DbService.dbConn);
 const utilityService = new UserUtilityServices();
+const emailService = new EmailService(loggerService);
 const userProfileService = new UserProfileService(
   loggerService,
   utilityService,
   userprofileModel,
 );
+const authService = new AuthenticationService(
+  loggerService,
+  userprofileModel,
+  utilityService,
+);
 const lsiService = new LsiService(
   loggerService,
   userProfileService,
+  userprofileModel,
   utilityService,
+  emailService,
 );
 
 const lsiController = new LsiController(loggerService, lsiService);
@@ -49,6 +59,7 @@ userProfileRouter.post(
 
 userProfileRouter.post(
   "/link/create",
+  authService.authenticateRequest,
   validatePayloadAsDto(CreateLsiRequestDto),
   lsiController.createLsi,
 );

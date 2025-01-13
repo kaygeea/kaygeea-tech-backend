@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb";
 import { JwtPayload } from "jsonwebtoken";
 import { socialPlatformNames } from "../utils/DTOs/create-lsi-request.dto.js";
 
-export interface IUtilityService {
+export interface IUserUtilityService {
   hashPassword(password: string): Promise<string>;
   comparePassword(password: string, hash: string): Promise<boolean | undefined>;
   jwtSignPayload(
