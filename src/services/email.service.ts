@@ -45,7 +45,7 @@ export class EmailService {
   ): Promise<void> {
     try {
       const mailOptions: Mail.Options = {
-        from: "Portfolio Management System",
+        from: process.env.NOTIFICATION_EMAIL_SENDER,
         to: `${notificationData.userEmail}`,
         subject: `${notificationData.lsiRecord.s_p_n} Visitor Milestone Target Reached!!`,
         text: `Congratulations ${notificationData.username}!! \n\nYou just got visitor number ${notificationData.lsiMilestoneTarget} from ${notificationData.lsiRecord.s_p_n} to your portfolio website. More wins!!`,
