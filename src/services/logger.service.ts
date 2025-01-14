@@ -38,9 +38,9 @@ export class LoggerService implements ILogger {
 
     loggers.add(loggerName, {
       format: combine(
+        timestamp(),
         json(),
         prettyPrint(),
-        timestamp(),
         errors({ stack: true }),
       ),
       transports: transportsList,
