@@ -1,9 +1,8 @@
 import {
   IsDate,
   IsDefined,
+  IsEmpty,
   IsNotEmpty,
-  IsNumber,
-  IsOptional,
   IsString,
   Length,
 } from "class-validator";
@@ -34,8 +33,7 @@ export class AddNewLsiRequestDto extends BaseDto {
   @IsString()
   socialPlatformName!: socialPlatformNames;
 
-  @IsOptional()
-  @IsNumber()
+  @IsEmpty()
   visitorCount!: number;
 
   @IsDefined()

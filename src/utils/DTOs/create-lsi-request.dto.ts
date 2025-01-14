@@ -1,3 +1,4 @@
+import dotenv from "dotenv";
 import {
   IsDefined,
   IsIn,
@@ -8,18 +9,13 @@ import {
 } from "class-validator";
 import { BaseDto } from "./base.dto.js";
 
-const allowedSocialPlatformNames = [
-  "linkedin",
-  "twitter",
-  "stack overflow",
-  "substack",
-  "discord",
-  "reddit",
-  "whatsapp",
-  "facebook",
-  "instagram",
-  "tiktok",
-] as const;
+dotenv.config();
+
+const allowedSocialPlatformNames = (
+  process.env.ALLOWED_SOCIAL_PLATFORM_NAMES || ""
+)
+  .split(",")
+  .map((spn) => spn.trim()) as readonly string[];
 
 export type socialPlatformNames = (typeof allowedSocialPlatformNames)[number];
 

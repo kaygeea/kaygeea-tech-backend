@@ -11,9 +11,6 @@ const { combine, errors, json, prettyPrint, timestamp } = format;
  * application services and models.
  */
 export class LoggerService implements ILogger {
-  // eslint-disable-next-line no-empty-function
-  constructor() {}
-
   /**
    * Creates and registers a logger for a given service or model.
    * The logger uses JSON, timestamps, and pretty-print formatting and outputs
@@ -41,9 +38,9 @@ export class LoggerService implements ILogger {
 
     loggers.add(loggerName, {
       format: combine(
+        timestamp(),
         json(),
         prettyPrint(),
-        timestamp(),
         errors({ stack: true }),
       ),
       transports: transportsList,
@@ -52,15 +49,4 @@ export class LoggerService implements ILogger {
 
     return loggers.get(loggerName);
   }
-
-  // /**
-  //  * Returns a singleton instance of the LoggerService.
-  //  * @returns An instance of the LoggerService.
-  //  */
-  // static getInstance(): LoggerService {
-  //   if (!this.instance) {
-  //     this.instance = new LoggerService();
-  //   }
-  //   return this.instance;
-  // }
 }

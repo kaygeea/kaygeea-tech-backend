@@ -10,26 +10,36 @@ import { ProjectDetailRequestDto } from "../utils/DTOs/project-detail.request.dt
 import { UserProfileService } from "../services/user-profile.service.js";
 import { UserUtilityServices } from "../services/user-utility.service.js";
 import { GeneralUtilityServices } from "../services/general-utility.service.js";
-import { UserProfileEvent } from "../events/user-profile.event.js";
+import { UserProfileEvents } from "../events/user-profile.event.js";
+import { LsiService } from "../services/lsi.service.js";
+import { EmailService } from "../services/email.service.js";
 // import logRequestBody from "../utils/middlewares/debugging-middlewares/log-req-value.middleware.js";
 
 const loggerService = new LoggerService();
 const userProfileModel = new UserProfileModel(DbService.dbConn);
 const projectDetailModel = new ProjectDetailModel(DbService.dbConn);
-const generalUtilityServices = new GeneralUtilityServices();
+const userUtilityService = new UserUtilityServices();
+const emailService = new EmailService(loggerService);
 const userProfileService = new UserProfileService(
   loggerService,
-  new UserUtilityServices(),
+  userUtilityService,
   userProfileModel,
 );
+const lsiService = new LsiService(
+  loggerService,
+  userProfileService,
+  userProfileModel,
+  userUtilityService,
+  emailService,
+);
 
-const userProfileEvents = new UserProfileEvent(userProfileService);
+const userProfileEvents = new UserProfileEvents(lsiService);
 
 const viewService = new ViewService(
   loggerService,
   userProfileModel,
   projectDetailModel,
-  generalUtilityServices,
+  new GeneralUtilityServices(),
   userProfileEvents,
 );
 

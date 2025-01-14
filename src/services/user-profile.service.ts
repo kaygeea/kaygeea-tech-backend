@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import { ObjectId, InsertOneResult } from "mongodb";
+import { InsertOneResult } from "mongodb";
 import { Logger } from "winston";
 import { LoggerService } from "./logger.service.js";
 import { UserUtilityServices } from "./user-utility.service.js";
@@ -16,13 +16,21 @@ import {
 } from "../utils/DTOs/user-init-data.dto.js";
 import UnexpectedError from "../utils/customErrors/unexpected.error.js";
 import AppBaseError from "../utils/customErrors/base.error.js";
-import { AddNewLsiRequestDto } from "../utils/DTOs/add-new-lsi-request.dto.js";
 import { IUserProfile } from "../interfaces/user-profile.interface.js";
-// import { IUserProfile } from "../interfaces/user-profile.interface.js";
 
+/**
+ * Service for handling user profile related activities like registration and login in.
+ */
 export class UserProfileService {
   private readonly logger: Logger;
 
+  /**
+   * Creates an instance of UserProfileService.
+   *
+   * @param {LoggerService} loggerService - The logger service to log messages.
+   * @param {UserUtilityServices} utilityServices - Utility service for various user operations.
+   * @param {UserProfileModel} userProfileModel - Model for interacting with the `profiles` in the DB.
+   */
   constructor(
     private readonly loggerService: LoggerService,
     private readonly utilityServices: UserUtilityServices,
@@ -36,6 +44,13 @@ export class UserProfileService {
     );
   }
 
+  /**
+   * Registers a new user profile.
+   *
+   * @param {RegisterRequestDto} userData - Data required to create a new user profile.
+   * @returns {Promise<RegisterResponseDto>} The response DTO with the new user's ID.
+   * @throws {HttpError} If email or username is already taken or if user creation fails.
+   */
   async register(userData: RegisterRequestDto): Promise<RegisterResponseDto> {
     try {
       this.logger.info(`Attempting to create new user profile.`);
@@ -111,6 +126,13 @@ export class UserProfileService {
     }
   }
 
+  /**
+   * Authenticates and logs in a user.
+   *
+   * @param {LoginRequestDto} userLoginData - Data required to authenticate and login a user.
+   * @returns {Promise<LoginResponseDto>} The response DTO containing the JWT token and username.
+   * @throws {HttpError} If the login credentials are invalid or incorrect.
+   */
   async login(userLoginData: LoginRequestDto): Promise<LoginResponseDto> {
     try {
       const { email, password } = userLoginData;
@@ -132,14 +154,14 @@ export class UserProfileService {
           throw new HttpError(`Incorrect password`, status.BAD_REQUEST);
         }
       } else {
-        throw new HttpError(`Incorrect email.`, status.BAD_REQUEST);
+        throw new HttpError(`Incorrect email`, status.BAD_REQUEST);
       }
 
       // create JWT
-      const jwtPayload = { id: new ObjectId(user._id), email };
+      const jwtPayload = { email };
       const token = this.utilityServices.jwtSignPayload(
         jwtPayload,
-        process.env.SECRET_STR as string,
+        process.env.JWT_SECRET as string,
       );
 
       return new LoginResponseDto(token, user.username);
@@ -155,6 +177,13 @@ export class UserProfileService {
     }
   }
 
+  /**
+   * Checks if a user profile exists based on the provided criteria (email or username).
+   *
+   * @param {keyof Pick<IUserProfile, "email" | "username">} checkCriteria - The field to check (either 'email' or 'username').
+   * @param {string} checkValue - The value to check against (either email or username).
+   * @returns {Promise<boolean>} True if the user profile exists, false otherwise.
+   */
   async userProfileExists(
     checkCriteria: keyof Pick<IUserProfile, "email" | "username">,
     checkValue: string,
@@ -171,57 +200,5 @@ export class UserProfileService {
     }
 
     return true;
-  }
-
-  async addNewLsi(DbLsiData: AddNewLsiRequestDto): Promise<void> {
-    try {
-      const { username, socialPlatformName } = DbLsiData;
-      this.logger.info(
-        `Adding ${socialPlatformName} LSI record for user: ${username}`,
-      );
-
-      // upsert new document in the shape {lsi: lsi, social_platform: socialPlatform: count: number}
-      this.userProfileModel.addNewLsiRecord(username, DbLsiData);
-
-      this.logger.info(
-        `Successfully added new ${socialPlatformName} LSI record for user: ${username}`,
-      );
-    } catch (error: unknown) {
-      if (!(error instanceof AppBaseError)) {
-        throw new UnexpectedError(
-          `Unexpected error while trying to add new LSI record`,
-          error as Error,
-          "UserProfileService.addNewLsi()",
-        );
-      }
-      throw error;
-    }
-  }
-
-  async updateLsiCount(username: string, lsi: string): Promise<void> {
-    // Does not return LSI record, but IUserProfile
-    try {
-      const updatedLsiRecord = await this.userProfileModel.updateLsiCount(
-        username,
-        lsi,
-      );
-      if (updatedLsiRecord === 0) {
-        this.logger.info(
-          "LSI Count update failed. Invalid LSI hash part received",
-        );
-      } else {
-        this.logger.info(`Successfully updated LSI visitor count`);
-      }
-    } catch (error: unknown) {
-      if (!(error instanceof AppBaseError)) {
-        // Process will crash if any error is thrown!
-        throw new UnexpectedError(
-          `Unexpected error while trying to add new LSI record`,
-          error as Error,
-          "UserProfileService.addNewLsi()",
-        );
-      }
-      throw error;
-    }
   }
 }
