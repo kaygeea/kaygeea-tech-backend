@@ -48,9 +48,8 @@ export class AuthenticationService {
   ): Promise<void> => {
     try {
       const jwtToken = this.extractToken(req);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const user = await this.verifyAndFetchUser(jwtToken);
-      console.log(jwtToken);
-      console.log(user);
       next();
     } catch (error: unknown) {
       this.logger.error(`Authentication failed: ${(error as Error).message}`);
