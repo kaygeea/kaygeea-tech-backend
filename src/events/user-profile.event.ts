@@ -1,6 +1,5 @@
 import { EventEmitter } from "events";
 import { LsiService } from "../services/lsi.service.js";
-import UnexpectedError from "../utils/customErrors/unexpected.error.js";
 import { LsiMilestoneNotificationDto } from "../utils/DTOs/lsi-milestone-notification.dto.js";
 
 /**
@@ -31,23 +30,39 @@ export class UserProfileEvents {
     // Event for when user profile is requested with LSI hashPart
     this.eventEmitter.on(
       "full lsi used",
-      (email: string, username: string, lsi: string) =>
-        this.handleLsiCountUpdate(email, username, lsi),
+      (email: string, username: string, lsi: string) => {
+        try {
+          this.handleLsiCountUpdate(email, username, lsi);
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            this.emitEvent("error", error);
+          } else {
+            const unexpectedError = new Error("An unknown error occurred");
+            this.emitEvent("error", unexpectedError);
+          }
+        }
+      },
     );
 
     this.eventEmitter.on(
       "lsi milestone reached",
-      (notificationData: LsiMilestoneNotificationDto) =>
-        this.handleLsiMilestoneReached(notificationData),
+      (notificationData: LsiMilestoneNotificationDto) => {
+        try {
+          this.handleLsiMilestoneReached(notificationData);
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            this.emitEvent("error", error);
+          } else {
+            const unexpectedError = new Error("An unknown error occurred");
+            this.emitEvent("error", unexpectedError);
+          }
+        }
+      },
     );
 
     // Error event handler to prevent uncaught exception crashes.
     this.eventEmitter.on("error", (error: Error) => {
-      throw new UnexpectedError(
-        "Unexpected error while handling a user profile event",
-        error,
-        "UserProfileEvent.errorEventHandler()",
-      );
+      console.error("Unexpected error occurred:", error);
     });
   }
 
@@ -67,14 +82,23 @@ export class UserProfileEvents {
     username: string,
     lsi: string,
   ) {
-    const isLsiMilestoneReached = await this.lsiService.updateLsiCount(
-      email,
-      username,
-      lsi,
-    );
+    try {
+      const isLsiMilestoneReached = await this.lsiService.updateLsiCount(
+        email,
+        username,
+        lsi,
+      );
 
-    if (isLsiMilestoneReached) {
-      this.emitEvent("lsi milestone reached", isLsiMilestoneReached);
+      if (isLsiMilestoneReached) {
+        this.emitEvent("lsi milestone reached", isLsiMilestoneReached);
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        this.emitEvent("error", error);
+      } else {
+        const unexpectedError = new Error("An unknown error occurred");
+        this.emitEvent("error", unexpectedError);
+      }
     }
   }
 
@@ -88,7 +112,16 @@ export class UserProfileEvents {
   private async handleLsiMilestoneReached(
     notificationData: LsiMilestoneNotificationDto,
   ) {
-    await this.lsiService.notifyOnLsiMilestone(notificationData);
+    try {
+      await this.lsiService.notifyOnLsiMilestone(notificationData);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        this.emitEvent("error", error);
+      } else {
+        const unexpectedError = new Error("An unknown error occurred");
+        this.emitEvent("error", unexpectedError);
+      }
+    }
   }
 
   /**
