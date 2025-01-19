@@ -158,6 +158,10 @@ export class UserProfileModel implements IProfileModel {
       options,
     );
 
+    if (!updateOp) {
+      return undefined;
+    }
+
     const returnedLsiRecords = updateOp as unknown as {
       lsi_records: ILsiRecord[];
     };
