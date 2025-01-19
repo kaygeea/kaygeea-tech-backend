@@ -207,7 +207,7 @@ export class LsiService {
         );
       } else {
         this.logger.info(
-          `Successfully updated LSI visitor count. Checking if LSI Milestone target for ${countUpdatedLsiRecord.s_p_n} has been reached`,
+          `Successfully updated LSI visitor count. Checking if ${countUpdatedLsiRecord.s_p_n} LSI Milestone target has been reached`,
         );
 
         const lsiMilestoneTarget = process.env.LSI_MILESTONE_TARGET as string;
@@ -221,7 +221,11 @@ export class LsiService {
           );
         } else if (countUpdatedLsiRecord.count < parseInt(lsiMilestoneTarget)) {
           this.logger.info(
-            `LSI milestone for ${countUpdatedLsiRecord.s_p_n} not reached yet. Currently at ${countUpdatedLsiRecord.count}`,
+            `${countUpdatedLsiRecord.s_p_n} LSI milestone not reached yet. Currently at ${countUpdatedLsiRecord.count}`,
+          );
+        } else {
+          this.logger.info(
+            `${countUpdatedLsiRecord.s_p_n} LSI visitor count currently at ${countUpdatedLsiRecord.count}`,
           );
         }
       }
@@ -231,7 +235,7 @@ export class LsiService {
       if (!(error instanceof AppBaseError)) {
         // Process will crash if any error is thrown!
         throw new UnexpectedError(
-          `Unexpected error while trying to add new LSI record`,
+          `Unexpected error while trying to update LSI record count`,
           error as Error,
           "LsiService.updateLsiCount()",
         );
